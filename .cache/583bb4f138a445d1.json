@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-02-05T03:23:42.615972",
+  "marketplace": "eBay",
+  "query": "vehicle",
+  "products": [
+    {
+      "name": "Vehicle - Buy It Now [New]",
+      "price": 4856020.0,
+      "currency": "KES (USD)",
+      "marketplace": "eBay",
+      "link": "https://www.ebay.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e53238/ffffff?text=eBay",
+      "country": "USA",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.615056",
+      "query": ""
+    },
+    {
+      "name": "Vehicle - Auction [Bidding]",
+      "price": 3784690.0,
+      "currency": "KES (USD)",
+      "marketplace": "eBay",
+      "link": "https://www.ebay.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e53238/ffffff?text=eBay",
+      "country": "USA",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.615337",
+      "query": ""
+    },
+    {
+      "name": "Vehicle - Refurbished [Certified]",
+      "price": 5512390.0,
+      "currency": "KES (USD)",
+      "marketplace": "eBay",
+      "link": "https://www.ebay.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e53238/ffffff?text=eBay",
+      "country": "USA",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.615389",
+      "query": ""
+    }
+  ]
+}

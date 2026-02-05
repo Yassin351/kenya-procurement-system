@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-02-05T03:23:42.853837",
+  "marketplace": "AliExpress",
+  "query": "vehicle",
+  "products": [
+    {
+      "name": "Vehicle - Free Shipping [Standard]",
+      "price": 3067610.0,
+      "currency": "KES (USD)",
+      "marketplace": "AliExpress",
+      "link": "https://www.aliexpress.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e43225/ffffff?text=AliExpress",
+      "country": "China",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.853044",
+      "query": ""
+    },
+    {
+      "name": "Vehicle - Flash Sale [Limited]",
+      "price": 2312570.0,
+      "currency": "KES (USD)",
+      "marketplace": "AliExpress",
+      "link": "https://www.aliexpress.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e43225/ffffff?text=AliExpress",
+      "country": "China",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.853062",
+      "query": ""
+    },
+    {
+      "name": "Vehicle - Premium [Express]",
+      "price": 6337630.0,
+      "currency": "KES (USD)",
+      "marketplace": "AliExpress",
+      "link": "https://www.aliexpress.com/search?q=vehicle",
+      "image_url": "https://via.placeholder.com/300/e43225/ffffff?text=AliExpress",
+      "country": "China",
+      "rating": null,
+      "reviews_count": null,
+      "original_price": null,
+      "discount_percent": null,
+      "availability": "In Stock",
+      "scraped_at": "2026-02-05T03:23:42.853070",
+      "query": ""
+    }
+  ]
+}

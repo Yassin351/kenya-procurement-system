@@ -1,0 +1,8 @@
+2026-02-03 23:07:33 | INFO     | core.logging:_log:73 | Supervisor initialized
+2026-02-03 23:07:33 | INFO     | core.logging:_log:73 | Starting workflow for: i want to buy an i phone
+2026-02-03 23:07:33 | INFO     | core.logging:_log:73 | Searching: i want to buy an i phone
+2026-02-03 23:08:32 | INFO     | core.logging:_log:73 | Starting workflow for: lastest iphone price on kilimall
+2026-02-03 23:08:32 | INFO     | core.logging:_log:73 | Searching: lastest iphone price on kilimall
+2026-02-03 23:15:15 | INFO     | core.logging:_log:73 | Supervisor initialized
+2026-02-03 23:15:16 | INFO     | core.logging:_log:73 | Starting workflow for: give me the cheapest iphone
+2026-02-03 23:15:16 | INFO     | core.logging:_log:73 | Searching: give me the cheapest iphone
