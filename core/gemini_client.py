@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Google Gemini integration for the procurement system.
 Handles all LLM interactions with retry logic and safety.

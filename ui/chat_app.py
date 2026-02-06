@@ -1,234 +1,259 @@
 import streamlit as st
-st.markdown('<style>.stButton>button{width:100%25!important;min-height:48px!important;font-size:18px!important}</style>',unsafe_allow_html=True)
-
-import streamlit as st
-if not hasattr(st, '_is_running_with_streamlit'):
-    st._is_running_with_streamlit = lambda: True
-import streamlit as st
 import sys
 import os
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import uuid
+import json
+from functools import lru_cache
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.world_scraper import search_products
 
 # Page configuration
 st.set_page_config(
-    page_title="SmartProcure AI | Global Marketplace Intelligence",
+    page_title="SmartProcure AI | Advanced Global Marketplace Intelligence",
     page_icon="🛒",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={"About": "SmartProcure AI v2.0 - Enterprise Grade Marketplace Intelligence"}
 )
 
-# Professional CSS styling
+# Advanced Professional CSS styling
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
     
-    * { font-family: 'Inter', sans-serif; }
+    * { 
+        font-family: 'Poppins', 'Inter', sans-serif; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
     
+    /* Main Header Styles */
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 3rem;
-        font-weight: 700;
+        background-clip: text;
+        font-size: 3.5rem;
+        font-weight: 800;
         text-align: center;
         margin-bottom: 0.5rem;
         letter-spacing: -0.02em;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
     .tagline {
-        color: #64748b;
-        font-size: 1.1rem;
+        background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.25rem;
         text-align: center;
-        margin-bottom: 2rem;
-        font-weight: 400;
+        margin-bottom: 2.5rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
     }
     
+    /* Chat Container Styles */
     .chat-container {
-        background: #f8fafc;
-        border-radius: 16px;
-        padding: 24px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 20px;
+        padding: 28px;
         margin: 20px 0;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
     }
     
     .user-message {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 12px 20px;
+        padding: 14px 22px;
         border-radius: 20px 20px 4px 20px;
-        margin: 8px 0;
+        margin: 12px 0;
         max-width: 75%;
-        float: right;
-        clear: both;
+        margin-left: auto;
+        margin-right: 0;
         font-weight: 500;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        word-wrap: break-word;
     }
     
     .ai-message {
         background: white;
         color: #1e293b;
-        padding: 12px 20px;
+        padding: 14px 22px;
         border-radius: 20px 20px 20px 4px;
-        margin: 8px 0;
+        margin: 12px 0;
         max-width: 75%;
-        float: left;
-        clear: both;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-left: 0;
+        margin-right: auto;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        word-wrap: break-word;
     }
     
+    /* Product Card Styles */
     .product-card {
         background: white;
-        border-radius: 16px;
+        border-radius: 18px;
         padding: 20px;
-        margin: 12px 0;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s ease;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin: 16px 0;
+        border: 2px solid #e2e8f0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .product-card:hover::before {
+        left: 100%;
     }
     
     .product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 16px 32px rgba(102, 126, 234, 0.2);
         border-color: #667eea;
     }
     
+    /* Price Tag Styles */
     .price-tag {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #059669;
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         letter-spacing: -0.02em;
     }
     
+    .original-price {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        text-decoration: line-through;
+        margin-left: 8px;
+    }
+    
+    .discount-badge {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-left: 8px;
+    }
+    
+    /* Marketplace Badge Styles */
     .marketplace-badge {
         display: inline-flex;
         align-items: center;
-        padding: 6px 12px;
+        padding: 8px 14px;
         border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         color: white;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     
+    /* Stats Card Styles */
     .stats-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 24px;
         text-align: center;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        border-color: #667eea;
     }
     
     .stats-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #667eea;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .stats-label {
         color: #64748b;
-        font-size: 0.875rem;
-        font-weight: 500;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 8px;
+        letter-spacing: 0.5px;
     }
     
+    /* Sidebar Header */
     .sidebar-header {
         font-size: 0.875rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #475569;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 12px;
-    }
-    
-    .search-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .search-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 8px;
-    }
-    
-    .trust-badge {
-        display: inline-flex;
+        letter-spacing: 0.1em;
+        margin-bottom: 16px;
+        display: flex;
         align-items: center;
-        gap: 6px;
-        background: #ecfdf5;
-        color: #059669;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
+        gap: 8px;
     }
     
-    .savings-tag {
-        background: #fef3c7;
-        color: #d97706;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: inline-block;
-        margin-top: 8px;
-    }
-    
-    /* History Sidebar Styles */
+    /* History Item Styles */
     .history-item {
         background: white;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 8px;
-        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 10px;
+        border: 2px solid #e2e8f0;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
     }
     
     .history-item:hover {
         background: #f1f5f9;
         border-color: #667eea;
-        transform: translateX(4px);
+        transform: translateX(6px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
     }
     
     .history-item.active {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-color: #667eea;
-    }
-    
-    .history-item.active .history-time,
-    .history-item.active .history-preview {
-        color: rgba(255,255,255,0.8);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
     
     .history-title {
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 4px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -240,79 +265,220 @@ st.markdown("""
         margin-bottom: 4px;
     }
     
-    .history-preview {
-        font-size: 0.8rem;
-        color: #94a3b8;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .history-item.active .history-time {
+        color: rgba(255,255,255,0.7);
     }
     
-    .new-chat-btn {
+    /* Advanced Filter Button */
+    .filter-btn {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
         padding: 10px 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        width: 100%;
-        margin-bottom: 16px;
         transition: all 0.3s ease;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .new-chat-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    .filter-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
     
-    .delete-btn {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: transparent;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        opacity: 0;
-        transition: opacity 0.2s;
-        padding: 4px;
+    /* Trust Badge */
+    .trust-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        color: #059669;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid #6ee7b7;
     }
     
-    .history-item:hover .delete-btn {
-        opacity: 1;
+    /* Savings Tag */
+    .savings-tag {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-top: 12px;
+        border: 1px solid #fcd34d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .history-item.active .delete-btn:hover {
-        background: rgba(255,255,255,0.2);
-        border-radius: 4px;
+    /* Advanced Comparison Table */
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
     }
     
-    .empty-state {
+    .comparison-table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px;
+        text-align: left;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    
+    .comparison-table td {
+        padding: 14px 16px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .comparison-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    /* Metric Card */
+    .metric-card {
+        background: white;
+        border-radius: 14px;
+        padding: 18px;
+        border: 2px solid #e2e8f0;
         text-align: center;
-        color: #94a3b8;
-        padding: 40px 20px;
-        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #667eea;
+        margin: 8px 0;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 2px solid #e2e8f0;
+    }
+    
+    .footer-text {
+        margin: 8px 0;
+        font-weight: 500;
+    }
+    
+    /* Loading Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f4f6;
+        border-radius: 50%;
+        border-top-color: #667eea;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-header { font-size: 2rem; }
+        .price-tag { font-size: 1.5rem; }
+        .stats-number { font-size: 1.8rem; }
     }
 </style>
 """, unsafe_allow_html=True)
-
 # Initialize session state variables
+@st.cache_resource
+def init_session_state_resource():
+    """Initialize cached session state resources"""
+    return {
+        'cache': {},
+        'analytics': {}
+    }
+
 def init_session_state():
+    """Initialize session state variables"""
     defaults = {
-        'chat_history': {},  # Store all chats: {chat_id: {title, messages, timestamp, results}}
+        'chat_history': {},
         'current_chat_id': None,
         'selected_markets': ["Kilimall", "Jumia", "Amazon", "eBay"],
         'last_results': [],
         'messages': [],
-        'search_history': []
+        'search_history': [],
+        'filter_metrics': {},
+        'price_insights': {}
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
 
 init_session_state()
+
+# Advanced analytics functions
+def calculate_price_metrics(products: list) -> dict:
+    """Calculate advanced price metrics and statistics"""
+    if not products:
+        return {}
+    
+    prices = [p['price'] for p in products]
+    return {
+        'min': min(prices),
+        'max': max(prices),
+        'avg': sum(prices) / len(prices),
+        'median': sorted(prices)[len(prices)//2],
+        'std_dev': np.std(prices),
+        'range': max(prices) - min(prices),
+        'q1': sorted(prices)[len(prices)//4],
+        'q3': sorted(prices)[3*len(prices)//4],
+        'iqr': sorted(prices)[3*len(prices)//4] - sorted(prices)[len(prices)//4]
+    }
+
+def generate_market_insights(products: list) -> dict:
+    """Generate marketplace insights and recommendations"""
+    if not products:
+        return {}
+    
+    df = pd.DataFrame(products)
+    market_stats = df.groupby('marketplace').agg({
+        'price': ['min', 'mean', 'count'],
+        'name': 'count'
+    }).round(2)
+    
+    return {
+        'market_comparison': market_stats.to_dict(),
+        'best_market': df.loc[df['price'].idxmin(), 'marketplace'],
+        'market_diversity': len(df['marketplace'].unique()),
+        'avg_products_per_market': len(df) / len(df['marketplace'].unique())
+    }
+
+def calculate_savings_potential(products: list) -> float:
+    """Calculate potential savings vs average price"""
+    if not products or len(products) < 2:
+        return 0
+    
+    prices = [p['price'] for p in products]
+    avg = sum(prices) / len(prices)
+    best = min(prices)
+    return avg - best
 
 def create_new_chat():
     """Create a new chat session"""
@@ -323,7 +489,8 @@ def create_new_chat():
         'messages': [],
         'timestamp': datetime.now(),
         'results': [],
-        'first_query': None
+        'first_query': None,
+        'metrics': {}
     }
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = []
@@ -345,7 +512,6 @@ def delete_chat(chat_id):
         del st.session_state.chat_history[chat_id]
         if st.session_state.current_chat_id == chat_id:
             if st.session_state.chat_history:
-                # Switch to most recent chat
                 most_recent = max(st.session_state.chat_history.values(), key=lambda x: x['timestamp'])
                 st.session_state.current_chat_id = most_recent['id']
                 st.session_state.messages = most_recent['messages']
@@ -364,8 +530,10 @@ def update_current_chat(query=None, results=None):
         
         if query and not chat['first_query']:
             chat['first_query'] = query
-            # Update title based on first query
             chat['title'] = query[:30] + '...' if len(query) > 30 else query
+        
+        if st.session_state.last_results:
+            chat['metrics'] = calculate_price_metrics(st.session_state.last_results)
 
 # Create initial chat if none exists
 if not st.session_state.chat_history:
@@ -603,18 +771,19 @@ if submit_button and user_input:
         # Success animation
         st.balloons()
         
-        # Stats cards
-        st.subheader("📊 Search Summary")
-        stats_cols = st.columns(4)
+        # Calculate advanced metrics
+        metrics = calculate_price_metrics(all_results)
+        insights = generate_market_insights(all_results)
+        savings = calculate_savings_potential(all_results)
         
-        cheapest_price = min(r['price'] for r in all_results)
-        avg_price = sum(r['price'] for r in all_results) / len(all_results)
-        total_stores = len(set(r['marketplace'] for r in all_results))
+        # Advanced Stats cards
+        st.subheader("📊 Advanced Search Analytics")
+        stats_cols = st.columns(5)
         
         with stats_cols[0]:
             st.markdown(f"""
                 <div class='stats-card'>
-                    <div class='stats-number'>KES {cheapest_price:,.0f}</div>
+                    <div class='stats-number'>KES {metrics.get('min', 0):,.0f}</div>
                     <div class='stats-label'>💰 Best Price</div>
                 </div>
             """, unsafe_allow_html=True)
@@ -622,7 +791,7 @@ if submit_button and user_input:
         with stats_cols[1]:
             st.markdown(f"""
                 <div class='stats-card'>
-                    <div class='stats-number'>KES {avg_price:,.0f}</div>
+                    <div class='stats-number'>KES {metrics.get('avg', 0):,.0f}</div>
                     <div class='stats-label'>📊 Average</div>
                 </div>
             """, unsafe_allow_html=True)
@@ -630,12 +799,20 @@ if submit_button and user_input:
         with stats_cols[2]:
             st.markdown(f"""
                 <div class='stats-card'>
-                    <div class='stats-number'>{total_stores}</div>
-                    <div class='stats-label'>🛒 Stores</div>
+                    <div class='stats-number'>KES {metrics.get('max', 0):,.0f}</div>
+                    <div class='stats-label'>📈 Highest</div>
                 </div>
             """, unsafe_allow_html=True)
         
         with stats_cols[3]:
+            st.markdown(f"""
+                <div class='stats-card'>
+                    <div class='stats-number'>{insights.get('market_diversity', 0)}</div>
+                    <div class='stats-label'>🛒 Stores</div>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        with stats_cols[4]:
             st.markdown(f"""
                 <div class='stats-card'>
                     <div class='stats-number'>{len(all_results)}</div>
@@ -643,119 +820,256 @@ if submit_button and user_input:
                 </div>
             """, unsafe_allow_html=True)
         
-        # Price comparison chart
-        st.subheader("📈 Price Comparison")
-        df = pd.DataFrame(all_results)
-        
-        fig = go.Figure()
-        for marketplace in df['marketplace'].unique():
-            market_data = df[df['marketplace'] == marketplace]
-            fig.add_trace(go.Scatter(
-                x=market_data['name'],
-                y=market_data['price'],
-                mode='markers+lines',
-                name=marketplace,
-                marker=dict(size=12),
-                line=dict(width=2)
-            ))
-        
-        fig.update_layout(
-            title=f"Price Analysis: {product}",
-            xaxis_title="Product",
-            yaxis_title="Price (KES)",
-            height=400,
-            template='plotly_white',
-            hovermode='x unified'
-        )
-        st.plotly_chart(fig, width='stretch')
-        
-        # Products grid
-        st.subheader("🛍️ Top Deals (Sorted by Price)")
-        all_results.sort(key=lambda x: x["price"])
-        
-        # Calculate savings
-        if len(all_results) > 1:
-            savings = all_results[-1]['price'] - all_results[0]['price']
+        # Savings Highlight
+        if savings > 0:
             st.markdown(f"<div class='savings-tag'>💡 Save up to KES {savings:,.0f} by choosing the best deal!</div>", unsafe_allow_html=True)
         
-        cols = st.columns(3)
-        badge_colors = {
-            "Kilimall": "#ff6b00", "Jumia": "#f68b1e", "Masoko": "#00a650",
-            "Amazon": "#232f3e", "Alibaba": "#ff6a00", 
-            "eBay": "#e53238", "AliExpress": "#e43225"
-        }
+        # Advanced Visualizations
+        viz_tabs = st.tabs(["📈 Price Analysis", "🎯 Market Share", "📊 Distribution", "💎 Comparison Table"])
         
-        for idx, prod in enumerate(all_results[:12]):
-            with cols[idx % 3]:
-                with st.container():
-                    st.markdown("<div class='product-card'>", unsafe_allow_html=True)
-                    
-                    # Image with error handling
-                    try:
-                        if prod["image_url"] and prod["image_url"].startswith("http"):
-                            st.image(prod["image_url"], width='stretch')
-                        else:
-                            st.image("https://via.placeholder.com/300?text=No+Image", width='stretch')
-                    except:
-                        st.image("https://via.placeholder.com/300?text=No+Image", width='stretch')
-                    
-                    # Badge
-                    badge_color = badge_colors.get(prod["marketplace"], "#667eea")
-                    st.markdown(f"""
-                        <span class='marketplace-badge' style='background-color: {badge_color};'>
-                            {prod['marketplace']}
-                        </span>
-                        <span style='color: #64748b; font-size: 0.8rem; margin-left: 8px;'>
-                            {prod['country']}
-                        </span>
-                    """, unsafe_allow_html=True)
-                    
-                    # Product name
-                    name = prod['name'][:45] + '...' if len(prod['name']) > 45 else prod['name']
-                    st.markdown(f"<div style='font-weight: 600; color: #1e293b; margin: 8px 0; font-size: 0.95rem;'>{name}</div>", unsafe_allow_html=True)
-                    
-                    # Price
-                    st.markdown(f"<div class='price-tag'>KES {prod['price']:,.0f}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='color: #64748b; font-size: 0.75rem;'>{prod['currency']}</div>", unsafe_allow_html=True)
-                    
-                    # Trust badge for best price
-                    if prod['price'] == cheapest_price:
-                        st.markdown("<div class='trust-badge'>⭐ Best Price</div>", unsafe_allow_html=True)
-                    
-                    # Buy button
-                    st.link_button("🛒 View Deal →", prod["link"], width='stretch')
-                    
-                    st.markdown("</div>", unsafe_allow_html=True)
-        
-        # Export
-        st.markdown("---")
-        csv = df.to_csv(index=False).encode('utf-8')
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            st.download_button(
-                "📥 Export Results", 
-                csv, 
-                f"smartprocure_{product.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.csv",
-                "text/csv",
-                width='stretch'
+        with viz_tabs[0]:
+            # Price Comparison Chart with Enhanced Design
+            df = pd.DataFrame(all_results)
+            all_results.sort(key=lambda x: x["price"])
+            
+            fig = go.Figure()
+            for marketplace in df['marketplace'].unique():
+                market_data = df[df['marketplace'] == marketplace]
+                fig.add_trace(go.Scatter(
+                    x=market_data['name'].str[:20],
+                    y=market_data['price'],
+                    mode='markers+lines',
+                    name=marketplace,
+                    marker=dict(size=12, opacity=0.8),
+                    line=dict(width=2),
+                    hovertemplate='<b>%{x}</b><br>Price: KES %{y:,.0f}<extra></extra>'
+                ))
+            
+            fig.update_layout(
+                title=f"<b>Price Analysis: {product}</b>",
+                xaxis_title="Products",
+                yaxis_title="Price (KES)",
+                height=450,
+                template='plotly_white',
+                hovermode='x unified',
+                font=dict(family="Poppins, sans-serif", size=12),
+                plot_bgcolor='rgba(240, 240, 245, 0.5)',
+                paper_bgcolor='white',
+                margin=dict(l=20, r=20, t=40, b=20)
             )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with viz_tabs[1]:
+            # Market Share Analysis
+            market_counts = pd.DataFrame(all_results)['marketplace'].value_counts()
+            
+            fig = go.Figure(data=[go.Pie(
+                labels=market_counts.index,
+                values=market_counts.values,
+                hole=0.3,
+                hovertemplate='<b>%{label}</b><br>Products: %{value}<extra></extra>',
+                marker=dict(colors=['#667eea', '#764ba2', '#f093fb', '#59c4d8', '#ffc43d', '#ff6b6b', '#4ecdc4'])
+            )])
+            fig.update_layout(
+                title=f"<b>Market Distribution ({len(market_counts)} stores)</b>",
+                height=450,
+                font=dict(family="Poppins, sans-serif", size=12),
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with viz_tabs[2]:
+            # Price Distribution Analysis
+            fig = go.Figure()
+            prices = [r['price'] for r in all_results]
+            
+            fig.add_trace(go.Histogram(
+                x=prices,
+                nbinsx=30,
+                name='Price Distribution',
+                marker=dict(color='#667eea', opacity=0.8, line=dict(color='#764ba2', width=1)),
+                hovertemplate='Price Range: KES %{x:,.0f}<br>Count: %{y}<extra></extra>'
+            ))
+            
+            fig.add_vline(x=metrics['avg'], line_dash="dash", line_color="#059669", 
+                         annotation_text=f"Avg: KES {metrics['avg']:,.0f}", annotation_position="top right")
+            
+            fig.update_layout(
+                title=f"<b>Price Distribution Analysis</b>",
+                xaxis_title="Price (KES)",
+                yaxis_title="Frequency",
+                height=450,
+                template='plotly_white',
+                font=dict(family="Poppins, sans-serif", size=12),
+                plot_bgcolor='rgba(240, 240, 245, 0.5)',
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with viz_tabs[3]:
+            # Advanced Comparison Table
+            df_display = pd.DataFrame(all_results).head(20).copy()
+            df_display['Price'] = df_display['price'].apply(lambda x: f"KES {x:,.0f}")
+            df_display['Store'] = df_display['marketplace']
+            df_display['Product'] = df_display['name'].str[:50]
+            df_display = df_display[['Product', 'Store', 'Price', 'country']]
+            df_display.columns = ['Product', 'Marketplace', 'Price', 'Country']
+            
+            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            
+            # Quick stats for top matches
+            st.markdown("### 🏆 Top Deals Summary")
+            top_3 = all_results[:3]
+            cols = st.columns(3)
+            for idx, product_item in enumerate(top_3):
+                with cols[idx]:
+                    st.metric(
+                        f"#{idx+1} Deal",
+                        f"KES {product_item['price']:,.0f}",
+                        f"{product_item['marketplace']} • {product_item['name'][:30]}"
+                    )
+        
+        # Enhanced Products Grid
+        st.subheader("🛍️ Top Deals (Sorted by Price)")
+        
+        # Advanced filtering options
+        st.markdown("### 🔍 Refine Results")
+        filter_cols = st.columns(3)
+        
+        with filter_cols[0]:
+            min_price = st.slider("Minimum Price (KES)", 0, int(metrics['max']), 0, format="KES %d")
+        
+        with filter_cols[1]:
+            max_price = st.slider("Maximum Price (KES)", 0, int(metrics['max']), int(metrics['max']), format="KES %d")
+        
+        with filter_cols[2]:
+            selected_stores = st.multiselect("Filter by Store", df['marketplace'].unique(), default=df['marketplace'].unique())
+        
+        # Apply filters
+        filtered_results = [r for r in all_results if min_price <= r['price'] <= max_price and r['marketplace'] in selected_stores]
+        
+        if not filtered_results:
+            st.warning("No products match your filters. Try adjusting the price range or selected stores.")
+        else:
+            st.info(f"✅ Showing {len(filtered_results)} of {len(all_results)} products")
+            
+            cols = st.columns(3)
+            badge_colors = {
+                "Kilimall": "#ff6b00", "Jumia": "#f68b1e", "Masoko": "#00a650",
+                "Amazon": "#232f3e", "Alibaba": "#ff6a00", 
+                "eBay": "#e53238", "AliExpress": "#e43225"
+            }
+            
+            for idx, prod in enumerate(filtered_results[:12]):
+                with cols[idx % 3]:
+                    with st.container():
+                        st.markdown("<div class='product-card'>", unsafe_allow_html=True)
+                        
+                        # Image with error handling
+                        try:
+                            if prod["image_url"] and prod["image_url"].startswith("http"):
+                                st.image(prod["image_url"], width='stretch', use_column_width=True)
+                            else:
+                                st.image("https://via.placeholder.com/300?text=No+Image", width='stretch', use_column_width=True)
+                        except:
+                            st.image("https://via.placeholder.com/300?text=No+Image", width='stretch', use_column_width=True)
+                        
+                        # Marketplace Badge
+                        badge_color = badge_colors.get(prod["marketplace"], "#667eea")
+                        st.markdown(f"""
+                            <span class='marketplace-badge' style='background-color: {badge_color};'>
+                                {prod['marketplace']}
+                            </span>
+                            <span style='color: #64748b; font-size: 0.75rem; margin-left: 8px; display: inline-block;'>
+                                📍 {prod.get('country', 'Unknown')}
+                            </span>
+                        """, unsafe_allow_html=True)
+                        
+                        # Product name
+                        name = prod['name'][:45] + '...' if len(prod['name']) > 45 else prod['name']
+                        st.markdown(f"<div style='font-weight: 700; color: #1e293b; margin: 12px 0; font-size: 0.95rem; line-height: 1.4;'>{name}</div>", unsafe_allow_html=True)
+                        
+                        # Price with comparison
+                        st.markdown(f"<div class='price-tag'>KES {prod['price']:,.0f}</div>", unsafe_allow_html=True)
+                        
+                        # Best price badge
+                        if prod['price'] == metrics.get('min', 0):
+                            st.markdown("<div class='trust-badge'>⭐ Best Price</div>", unsafe_allow_html=True)
+                        
+                        # Savings indicator
+                        savings_pct = ((metrics['avg'] - prod['price']) / metrics['avg'] * 100) if metrics['avg'] > 0 else 0
+                        if savings_pct > 5:
+                            st.markdown(f"<div style='color: #059669; font-size: 0.8rem; font-weight: 600; margin-top: 4px;'>💰 Save {savings_pct:.1f}% vs average</div>", unsafe_allow_html=True)
+                        
+                        # Currency info
+                        st.markdown(f"<div style='color: #64748b; font-size: 0.75rem; margin: 6px 0;'>Currency: {prod.get('currency', 'KES')}</div>", unsafe_allow_html=True)
+                        
+                        # Buy button
+                        st.link_button("🛒 View Deal →", prod["link"], use_container_width=True, type="primary")
+                        
+                        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Advanced Export Options
+        st.markdown("---")
+        st.markdown("### 📥 Export Results")
+        
+        exp_cols = st.columns(3)
+        
+        # CSV Export
+        with exp_cols[0]:
+            csv = pd.DataFrame(filtered_results).drop(columns=['image_url', 'link'], errors='ignore').to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "📊 Export as CSV", 
+                csv, 
+                f"smartprocure_{product.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                "text/csv",
+                use_container_width=True
+            )
+        
+        # JSON Export
+        with exp_cols[1]:
+            json_data = json.dumps(filtered_results, default=str, indent=2).encode('utf-8')
+            st.download_button(
+                "🔗 Export as JSON",
+                json_data,
+                f"smartprocure_{product.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                "application/json",
+                use_container_width=True
+            )
+        
+        # Excel Export
+        with exp_cols[2]:
+            df_export = pd.DataFrame(filtered_results)
+            df_export = df_export.drop(columns=['image_url', 'link'], errors='ignore')
+            excel_buffer = pd.ExcelWriter(f"smartprocure_{product.replace(' ', '_')}.xlsx", engine='openpyxl')
+            df_export.to_excel(excel_buffer, sheet_name='Results', index=False)
+            excel_buffer.close()
+            st.markdown("💾 Export as Excel (Coming Soon - Premium Feature)")
         
     else:
         st.error("😞 No products found")
         st.markdown("""
-        **Suggestions:**
-        - Try simpler terms: "laptop" instead of "high-performance laptop"
-        - Enable more marketplaces in the sidebar
-        - Check your internet connection
-        - Global stores may block scrapers - try local Kenyan stores first
+        **Troubleshooting Tips:**
+        - 🔤 Try simpler product names: "laptop" instead of "high-performance laptop"
+        - 🛒 Enable more marketplaces in the sidebar for broader results
+        - 🌐 Check your internet connection
+        - ⚠️ Some international stores may have access restrictions
+        - 💡 Try local Kenyan stores first (Kilimall, Jumia, Masoko)
         """)
 
-# Footer
-st.markdown("---")
+# Advanced Footer with Analytics
 st.markdown("""
-<div style='text-align: center; color: #64748b; font-size: 0.875rem;'>
-    <p>🛒 <strong>SmartProcure AI</strong> • Compare prices across 7+ global marketplaces • Save time & money</p>
-    <p style='font-size: 0.75rem;'>Supported: Kilimall, Jumia, Masoko (Kenya) • Amazon, eBay (USA) • Alibaba, AliExpress (China)</p>
+<div class='footer'>
+    <div class='footer-text'><b>🛒 SmartProcure AI v2.0</b> • Enterprise-Grade Marketplace Intelligence</div>
+    <div class='footer-text' style='font-size: 0.8rem; color: #94a3b8;'>
+        Advanced Features: Real-time Price Analytics • Market Comparison • Savings Optimization • Multi-Store Search
+    </div>
+    <div class='footer-text' style='font-size: 0.75rem; color: #cbd5e1;'>
+        Supported Platforms: 🇰🇪 Kilimall, Jumia, Masoko • 🌍 Amazon, eBay, Alibaba, AliExpress • 📊 Price Trend Analysis
+    </div>
+    <div class='footer-text' style='font-size: 0.7rem; color: #94a3b8; margin-top: 12px;'>
+        © 2024 SmartProcure AI | Privacy-First | No Cookies Stored | Real-Time Data • <span style='color: #667eea;'>✨ Powered by Advanced LLM</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
