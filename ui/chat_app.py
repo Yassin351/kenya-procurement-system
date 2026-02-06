@@ -398,11 +398,41 @@ st.markdown("""
         to { transform: rotate(360deg); }
     }
     
+    /* Mobile Form Optimization */
+    .stTextInput {
+        width: 100% !important;
+    }
+    
+    .stFormSubmitButton {
+        width: 100% !important;
+        padding: 12px 24px !important;
+        font-size: 1rem !important;
+    }
+    
     /* Responsive Design */
     @media (max-width: 768px) {
         .main-header { font-size: 2rem; }
         .price-tag { font-size: 1.5rem; }
         .stats-number { font-size: 1.8rem; }
+        
+        /* Mobile form layout */
+        .stForm {
+            gap: 12px !important;
+        }
+        
+        .stTextInput input {
+            font-size: 16px !important;
+            padding: 12px !important;
+            min-height: 48px !important;
+        }
+        
+        .stFormSubmitButton > button {
+            width: 100% !important;
+            font-size: 16px !important;
+            padding: 12px 16px !important;
+            min-height: 48px !important;
+            border-radius: 12px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -697,15 +727,15 @@ for message in st.session_state.messages:
 
 # Input form
 with st.form(key="chat_form", clear_on_submit=True):
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        user_input = st.text_input(
-            "Type your request...",
-            placeholder="e.g., I need a laptop under 50k from Amazon, or Find me cheap Nike shoes",
-            label_visibility="collapsed"
-        )
-    with col2:
-        submit_button = st.form_submit_button("🔍 Search", width='stretch')
+    # Mobile-responsive form layout
+    user_input = st.text_input(
+        "Type your request...",
+        placeholder="e.g., I need a laptop under 50k from Amazon, or Find me cheap Nike shoes",
+        label_visibility="collapsed"
+    )
+    
+    # Full-width submit button
+    submit_button = st.form_submit_button("🔍 Search", use_container_width=True)
 
 # Process search
 if submit_button and user_input:

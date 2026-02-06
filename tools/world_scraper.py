@@ -690,13 +690,17 @@ class WorldScraper:
                     all_products.extend(products)
                     
                     # Streamlit feedback
-                    if st._is_running_with_streamlit:
+                    try:
                         st.success(f"✅ {market}: {len(products)} products")
+                    except:
+                        pass
                         
                 except Exception as e:
                     logger.error(f"Error retrieving {market} results: {e}")
-                    if st._is_running_with_streamlit:
+                    try:
                         st.error(f"❌ {market}: Failed")
+                    except:
+                        pass
         
         # Sort by price
         all_products.sort(key=lambda x: x.price)
@@ -722,21 +726,30 @@ def search_products(query: str, markets: Optional[List[str]] = None) -> List[Dic
         markets = ["Kilimall", "Jumia", "Masoko", "Amazon", "eBay", "Alibaba", "AliExpress"]
     
     # Show progress in Streamlit
-    if st._is_running_with_streamlit:
+    progress_bar = None
+    try:
         st.info(f"🔍 Searching worldwide for: **{query}**")
         progress_bar = st.progress(0)
+    except:
+        pass
     
     scraper = WorldScraper(use_cache=True, max_workers=4)
     
     # Update progress
-    if st._is_running_with_streamlit:
-        for i, _ in enumerate(markets):
-            progress_bar.progress((i + 1) / len(markets))
+    if progress_bar:
+        try:
+            for i, _ in enumerate(markets):
+                progress_bar.progress((i + 1) / len(markets))
+        except:
+            pass
     
     products = scraper.search_all(query, markets)
     
-    if st._is_running_with_streamlit:
-        progress_bar.empty()
+    if progress_bar:
+        try:
+            progress_bar.empty()
+        except:
+            pass
     
     # Convert to dict format expected by frontend
     return [

@@ -55,7 +55,7 @@ class GeminiClient:
     
     def analyze_price_trend(self, price_history: List[Dict]) -> Dict[str, Any]:
         """Use Gemini to analyze price trends and provide insights."""
-        prompt = f\"\"\"
+        prompt = f"""
         Analyze the following price history and provide insights:
         {price_history}
         
@@ -66,7 +66,7 @@ class GeminiClient:
         4. Expected price change in 7 days
         
         Return as JSON.
-        \"\"\"
+        """
         
         try:
             response = self.generate(prompt, temperature=0.2)
