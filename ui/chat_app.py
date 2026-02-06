@@ -735,7 +735,7 @@ with st.form(key="chat_form", clear_on_submit=True):
     )
     
     # Full-width submit button
-    submit_button = st.form_submit_button("🔍 Search", use_container_width=True)
+    submit_button = st.form_submit_button("🔍 Search", width='stretch')
 
 # Process search
 if submit_button and user_input:
@@ -887,7 +887,7 @@ if submit_button and user_input:
                 paper_bgcolor='white',
                 margin=dict(l=20, r=20, t=40, b=20)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         with viz_tabs[1]:
             # Market Share Analysis
@@ -906,7 +906,7 @@ if submit_button and user_input:
                 font=dict(family="Poppins, sans-serif", size=12),
                 margin=dict(l=20, r=20, t=40, b=20)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         with viz_tabs[2]:
             # Price Distribution Analysis
@@ -934,7 +934,7 @@ if submit_button and user_input:
                 plot_bgcolor='rgba(240, 240, 245, 0.5)',
                 margin=dict(l=20, r=20, t=40, b=20)
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         with viz_tabs[3]:
             # Advanced Comparison Table
@@ -945,7 +945,7 @@ if submit_button and user_input:
             df_display = df_display[['Product', 'Store', 'Price', 'country']]
             df_display.columns = ['Product', 'Marketplace', 'Price', 'Country']
             
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(df_display, width='stretch', hide_index=True)
             
             # Quick stats for top matches
             st.markdown("### 🏆 Top Deals Summary")
@@ -1035,7 +1035,7 @@ if submit_button and user_input:
                         st.markdown(f"<div style='color: #64748b; font-size: 0.75rem; margin: 6px 0;'>Currency: {prod.get('currency', 'KES')}</div>", unsafe_allow_html=True)
                         
                         # Buy button
-                        st.link_button("🛒 View Deal →", prod["link"], use_container_width=True, type="primary")
+                        st.link_button("🛒 View Deal →", prod["link"], width='stretch', type="primary")
                         
                         st.markdown("</div>", unsafe_allow_html=True)
         

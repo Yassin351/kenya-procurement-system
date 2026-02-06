@@ -39,7 +39,7 @@ with st.sidebar:
         aliexpress = st.checkbox("AliExpress", value=True)
     
     max_price = st.number_input("Maximum Budget (KES)", min_value=0, value=1000000, step=5000)
-    search_btn = st.button("Search Worldwide", type="primary", use_container_width=True)
+    search_btn = st.button("Search Worldwide", type="primary", width='stretch')
 
 if search_btn and query:
     search_query = extract_keywords(query)
@@ -81,7 +81,7 @@ if search_btn and query:
             st.subheader("Price Analysis")
             fig = px.bar(df, x="name", y="price", color="marketplace", facet_col="country", 
                         title=f"Price Comparison: {search_query}", height=500)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
             
             st.subheader("Product Listings")
             results.sort(key=lambda x: x["price"])
@@ -95,11 +95,11 @@ if search_btn and query:
                     # Display product image with error handling
                     try:
                         if product["image_url"] and product["image_url"].startswith("http"):
-                            st.image(product["image_url"], use_container_width=True)
+                            st.image(product["image_url"], width='stretch')
                         else:
-                            st.image("https://via.placeholder.com/300?text=No+Image", use_container_width=True)
+                            st.image("https://via.placeholder.com/300?text=No+Image", width='stretch')
                     except:
-                        st.image("https://via.placeholder.com/300?text=No+Image", use_container_width=True)
+                        st.image("https://via.placeholder.com/300?text=No+Image", width='stretch')
                     
                     # Marketplace badge
                     badge_color = badge_colors.get(product["marketplace"], "#666")
@@ -114,7 +114,7 @@ if search_btn and query:
                     st.markdown(f"<p style='color:#666;font-size:0.75rem;margin:0;'>{product['currency']}</p>", unsafe_allow_html=True)
                     
                     # Direct link button
-                    st.link_button("🛒 View Product", product["link"], use_container_width=True)
+                    st.link_button("🛒 View Product", product["link"], width='stretch')
                     st.markdown("---")
             
             # Export

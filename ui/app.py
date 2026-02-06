@@ -221,7 +221,7 @@ with st.sidebar:
     enable_tax_calc = st.checkbox("💰 Calculate Taxes & Levies", value=True)
     enable_compliance = st.checkbox("✅ Compliance Verification", value=True)
     
-    analyze_btn = st.button("🔍 Analyze Market", type="primary", use_container_width=True)
+    analyze_btn = st.button("🔍 Analyze Market", type="primary", width='stretch')
 
 # Main Content
 if analyze_btn and product_query:
@@ -356,7 +356,7 @@ if analyze_btn and product_query:
                 json.dumps(result, indent=2, default=str).encode('utf-8'),
                 f"procurement_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 "application/json",
-                use_container_width=True
+                width='stretch'
             )
         
         except Exception as e:
